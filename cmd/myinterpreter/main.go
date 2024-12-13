@@ -30,13 +30,28 @@ func main() {
 	 }
 	
     for i:=0; i < len(fileContents); i++ {
-        // left parenthesis
         if (fileContents[i] == 40) {
             fmt.Println("LEFT_PAREN ( null")
-        // right parenthesis
         } else if (fileContents[i] == 41) {
             fmt.Println("RIGHT_PAREN ) null")
+        } else if (fileContents[i] == 123) {
+            fmt.Println("LEFT_BRACE { null")
+        } else if (fileContents[i] == 125) {
+            fmt.Println("RIGHT_BRACE } null")
+        } else if (fileContents[i] == 44) {
+            fmt.Println("COMMA , null")
+        } else if (fileContents[i] == 46) {
+            fmt.Println("DOT . null")
+        } else if (fileContents[i] == 42) {
+            fmt.Println("STAR * null")
+        } else if (fileContents[i] == 43) {
+            fmt.Println("PLUS + null")
+        } else if (fileContents[i] == 45) {
+            fmt.Println("MINUS - null")
+        } else if (fileContents[i] == 59) {
+            fmt.Println("SEMICOLON ; null")
         }
+
     }
 
     // adding EOF token at end of file
