@@ -28,7 +28,9 @@ func main() {
 	 	fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 	 	os.Exit(1)
 	 }
-	
+
+     line_num := 1
+    is_lexical_error := false
     for i:=0; i < len(fileContents); i++ {
         if (fileContents[i] == 40) {
             fmt.Println("LEFT_PAREN ( null")
@@ -50,10 +52,25 @@ func main() {
             fmt.Println("MINUS - null")
         } else if (fileContents[i] == 59) {
             fmt.Println("SEMICOLON ; null")
+        } else if (fileContents[i] == 36) {
+            is_lexical_error = true
+            fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: $\n",  line_num)
+        } else if (fileContents[i] == 35) {
+            is_lexical_error = true
+            fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: #\n", line_num)
+        } else {
+            is_lexical_error = true
+            fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line_num, fileContents[i])
         }
-
     }
 
     // adding EOF token at end of file
 	fmt.Println("EOF  null")
+
+    status_code := 0
+    if is_lexical_error {
+        status_code = 65
+    }
+
+    os.Exit(status_code)
 }
