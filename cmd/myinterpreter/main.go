@@ -29,9 +29,16 @@ func main() {
 	 	os.Exit(1)
 	 }
 	
-    if len(fileContents) > 0 {
-	 	panic("Scanner not implemented")
-	 } else {
-	 	fmt.Println("EOF  null") // Placeholder, remove this line when implementing the scanner
-	 }
+    for i:=0; i < len(fileContents); i++ {
+        // left parenthesis
+        if (fileContents[i] == 40) {
+            fmt.Println("LEFT_PAREN ( null")
+        // right parenthesis
+        } else if (fileContents[i] == 41) {
+            fmt.Println("RIGHT_PAREN ) null")
+        }
+    }
+
+    // adding EOF token at end of file
+	fmt.Println("EOF  null")
 }
