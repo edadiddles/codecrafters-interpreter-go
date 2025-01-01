@@ -96,6 +96,18 @@ func main() {
             } else {
                 fmt.Println("SLASH / null")
             }
+        } else if fileContents[i] == '"' {
+            i++
+            contents := []byte{}
+            for ; i < len(fileContents) && fileContents[i] != '"'; i++ {
+                contents = append(contents, fileContents[i])
+            }
+            if i < len(fileContents) && fileContents[i] == '"' {
+                fmt.Printf("STRING \"%s\" %s\n", string(contents), string(contents))
+            } else {
+                is_lexical_error = true
+                fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n",  line_num)
+            }
         } else if fileContents[i] == ' ' {
         } else if fileContents[i] == '\t' {
         } else if fileContents[i] == '\n' {
