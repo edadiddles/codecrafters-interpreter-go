@@ -88,6 +88,16 @@ func main() {
             } else {
                 fmt.Println("GREATER > null")
             }
+        } else if fileContents[i] == '/' {
+            if len(fileContents) > i+1 && fileContents[i+1] == '/' {
+                i++
+                for ; i < len(fileContents) && fileContents[i] != '\n'; i++ {
+                    // do nothing
+                }
+                line_num++
+            } else {
+                fmt.Println("SLASH / null")
+            }
         } else if (fileContents[i] == 36) {
             is_lexical_error = true
             fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: $\n",  line_num)
