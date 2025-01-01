@@ -91,17 +91,19 @@ func main() {
         } else if fileContents[i] == '/' {
             if len(fileContents) > i+1 && fileContents[i+1] == '/' {
                 i++
-                for ; i < len(fileContents) && fileContents[i] != '\n'; i++ {
-                    // do nothing
-                }
+                for ; i < len(fileContents) && fileContents[i] != '\n'; i++ {} // do nothing
                 line_num++
             } else {
                 fmt.Println("SLASH / null")
             }
-        } else if (fileContents[i] == 36) {
+        } else if fileContents[i] == ' ' {
+        } else if fileContents[i] == '\t' {
+        } else if fileContents[i] == '\n' {
+            line_num++
+        } else if (fileContents[i] == '$') {
             is_lexical_error = true
             fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: $\n",  line_num)
-        } else if (fileContents[i] == 35) {
+        } else if (fileContents[i] == '#') {
             is_lexical_error = true
             fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: #\n", line_num)
         } else {
