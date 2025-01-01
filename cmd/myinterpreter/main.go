@@ -5,6 +5,14 @@ import (
 	"os"
 )
 
+
+//type Token struct {
+//    type []u8,
+//    lexeme []u8,
+//    literal []u8,
+//}
+
+
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
@@ -29,29 +37,57 @@ func main() {
 	 	os.Exit(1)
 	 }
 
-     line_num := 1
+    line_num := 1
     is_lexical_error := false
     for i:=0; i < len(fileContents); i++ {
-        if (fileContents[i] == 40) {
+        if (fileContents[i] == '(') {
             fmt.Println("LEFT_PAREN ( null")
-        } else if (fileContents[i] == 41) {
+        } else if (fileContents[i] == ')') {
             fmt.Println("RIGHT_PAREN ) null")
-        } else if (fileContents[i] == 123) {
+        } else if (fileContents[i] == '{') {
             fmt.Println("LEFT_BRACE { null")
-        } else if (fileContents[i] == 125) {
+        } else if (fileContents[i] == '}') {
             fmt.Println("RIGHT_BRACE } null")
-        } else if (fileContents[i] == 44) {
+        } else if (fileContents[i] == ',') {
             fmt.Println("COMMA , null")
-        } else if (fileContents[i] == 46) {
+        } else if (fileContents[i] == '.') {
             fmt.Println("DOT . null")
-        } else if (fileContents[i] == 42) {
+        } else if (fileContents[i] == '*') {
             fmt.Println("STAR * null")
-        } else if (fileContents[i] == 43) {
+        } else if (fileContents[i] == '+') {
             fmt.Println("PLUS + null")
-        } else if (fileContents[i] == 45) {
+        } else if (fileContents[i] == '-') {
             fmt.Println("MINUS - null")
-        } else if (fileContents[i] == 59) {
+        } else if (fileContents[i] == ';') {
             fmt.Println("SEMICOLON ; null")
+        } else if fileContents[i] == '!' {
+            if len(fileContents) > i+1 && fileContents[i+1] == '='{
+                fmt.Println("BANG_EQUAL != null")
+                i++
+            } else {
+                fmt.Println("BANG ! null")
+            }
+        } else if fileContents[i] == '=' {
+            if len(fileContents) > i+1 && fileContents[i+1] == '='{
+                fmt.Println("EQUAL_EQUAL == null")
+                i++
+            } else {
+                fmt.Println("EQUAL = null")
+            }
+        } else if fileContents[i] == '<' {
+            if len(fileContents) > i+1 && fileContents[i+1] == '='{
+                fmt.Println("LESS_EQUAL <= null")
+                i++
+            } else {
+                fmt.Println("LESS < null")
+            }
+        } else if fileContents[i] == '>' {
+            if len(fileContents) > i+1 && fileContents[i+1] == '='{
+                fmt.Println("GREATER_EQUAL >= null")
+                i++
+            } else {
+                fmt.Println("GREATER > null")
+            }
         } else if (fileContents[i] == 36) {
             is_lexical_error = true
             fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: $\n",  line_num)
