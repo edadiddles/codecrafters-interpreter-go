@@ -175,6 +175,8 @@ func main() {
                 fmt.Println("FOR for null")
             } else if string(word) == "fun" {
                 fmt.Println("FUN fun null")
+            } else if string(word) == "if" {
+                fmt.Println("IF if null")
             } else if string(word) == "nil" {
                 fmt.Println("NIL nil null")
             } else if string(word) == "or" {
