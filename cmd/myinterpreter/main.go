@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+    "strconv"
 )
 
 
@@ -108,8 +109,56 @@ func main() {
                 is_lexical_error = true
                 fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n",  line_num)
             }
+        } else if fileContents[i] >= '0' && fileContents[i] <= '9' {
+            contents := []byte{}
+            has_decimal := false
+            num_decimal_digits := 0
+            has_non_zero_decimal := false
+            for ; i < len(fileContents) && ((fileContents[i] >= '0' && fileContents[i] <= '9') || fileContents[i] == '.'); i++ {
+                if fileContents[i] == '.' {
+                    if has_decimal {
+                        fmt.Fprintf(os.Stderr, "[line %d] Error: ...\n", line_num)
+                    }
+                    
+                    has_decimal = true
+                    if len(fileContents) > 0 {
+                        if len(fileContents) > i+1 && fileContents[i+1] >= '0' && fileContents[i+1] <= '9' {
+                            contents = append(contents, fileContents[i])
+                            i++
+                            contents = append(contents, fileContents[i])
+                            if fileContents[i] != '0'{
+                                has_non_zero_decimal = true
+                            }
+                            num_decimal_digits++
+                        } else {
+                            fmt.Fprintf(os.Stderr, "[line %d] Error: ...\n", line_num)
+                        }
+                    } else {
+                        fmt.Fprintf(os.Stderr, "[line %d] Error: ...\n", line_num)
+                    }
+                } else {
+                    contents = append(contents, fileContents[i])
+                    if has_decimal { 
+                        if fileContents[i] != '0'{
+                            has_non_zero_decimal = true
+                        }
+                        num_decimal_digits++
+                    }
+                }
+            }
+            if num_decimal_digits == 0 || !has_non_zero_decimal {
+                num_decimal_digits = 1
+            }
+
+            f, _ := strconv.ParseFloat(string(contents), 32)
+            float_fmt := fmt.Sprintf("%s%df", "%.", num_decimal_digits)
+            fmt_str := fmt.Sprintf("NUMBER %s %s\n", string(contents), float_fmt)
+            fmt.Printf(fmt_str, f)
+            i-- //decrement counter to avoid skipping due to increment in parent for loop
         } else if fileContents[i] == ' ' {
+            // do nothing
         } else if fileContents[i] == '\t' {
+            // do nothing
         } else if fileContents[i] == '\n' {
             line_num++
         } else if (fileContents[i] == '$') {
