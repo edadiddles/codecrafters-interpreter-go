@@ -155,6 +155,48 @@ func main() {
             fmt_str := fmt.Sprintf("NUMBER %s %s\n", string(contents), float_fmt)
             fmt.Printf(fmt_str, f)
             i-- //decrement counter to avoid skipping due to increment in parent for loop
+        } else if (fileContents[i] >= 'a' && fileContents[i] <= 'z') || (fileContents[i] >= 'A' && fileContents[i] <= 'Z') || (fileContents[i] == '_') || (fileContents[i] >= '0' && fileContents[i] <= '9') {
+            word := []byte{}
+            word = append(word, fileContents[i])
+            for i++; i < len(fileContents) && ((fileContents[i] >= 'a' && fileContents[i] <= 'z') || (fileContents[i] >= 'A' && fileContents[i] <= 'Z') || (fileContents[i] == '_') || (fileContents[i] >= '0' && fileContents[i] <= '9')); i++ {
+                word = append(word, fileContents[i])
+            }
+            i--
+
+            if string(word) == "and" {
+                fmt.Println("AND and null")
+            } else if string(word) == "class" {
+                fmt.Println("CLASS class null")
+            } else if string(word) == "else" {
+                fmt.Println("ELSE else null")
+            } else if string(word) == "false" {
+                fmt.Println("FALSE false null")
+            } else if string(word) == "for" {
+                fmt.Println("FOR for null")
+            } else if string(word) == "fun" {
+                fmt.Println("FUN fun null")
+            } else if string(word) == "nil" {
+                fmt.Println("NIL nil null")
+            } else if string(word) == "or" {
+                fmt.Println("OR or null")
+            } else if string(word) == "print" {
+                fmt.Println("PRINT print null")
+            } else if string(word) == "return" {
+                fmt.Println("RETURN return null")
+            } else if string(word) == "super" {
+                fmt.Println("SUPER super null")
+            } else if string(word) == "this" {
+                fmt.Println("THIS this null")
+            } else if string(word) == "true" {
+                fmt.Println("TRUE true null")
+            } else if string(word) == "var" {
+                fmt.Println("VAR var null")
+            } else if string(word) == "while" {
+                fmt.Println("WHILE while null")
+            } else {
+                fmt.Printf("IDENTIFIER %s null\n", word)
+            }
+         
         } else if fileContents[i] == ' ' {
             // do nothing
         } else if fileContents[i] == '\t' {
