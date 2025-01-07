@@ -8,10 +8,10 @@ import (
 
 type TokenType int
 
-type Token[T any] struct {
+type Token struct {
     Type TokenType
     Lexeme string
-    Literal T
+    Literal interface{}
     Line int
 }
 
@@ -66,7 +66,9 @@ const (
     EOF
 
     // Error
-    Error
+    UnterminatedStringError
+    NumericError
+    UnexpectedCharacterError
 )
 
 var tokenTypeName = map[TokenType]string {
@@ -97,7 +99,6 @@ var tokenTypeName = map[TokenType]string {
     And: "AND",
     Class: "CLASS",
     Else: "ELSE",
-    False: "FALSE",
     For: "FOR",
     Fun: "FUN",
     If: "IF",
@@ -106,9 +107,11 @@ var tokenTypeName = map[TokenType]string {
     Print: "PRINT",
     Super: "SUPER",
     This: "THIS",
-    True: "TRUE",
     Var: "VAR",
     While: "WHILE",
+    Return: "RETURN",
+    True: "TRUE",
+    False: "FALSE",
 
     // Literals
     Identifier: "IDENTIFIER",
@@ -117,41 +120,53 @@ var tokenTypeName = map[TokenType]string {
 
     // End of File
     EOF: "EOF",
-
-    // Error
-    Error: "ERROR",
 }
+
+
 
 func GetDecimalPlaces(floatStr string) int {
     num_decimals := 0
-    for i := len(floatStr)-1; i >= 0; i-- {
+    has_decimal := false
+    for i:=len(floatStr)-1; i >= 0; i-- {
         if floatStr[i] == '.' {
+            has_decimal = true
             break
         } else if num_decimals != 0 || floatStr[i] != '0' {
             num_decimals++
         }
     }
 
-    if num_decimals == 0 {
+    if num_decimals == 0 || !has_decimal {
         num_decimals = 1
     }
 
     return num_decimals
 }
 
-func (token *Token[T]) PrintToken() {
-    if token.Type == Error {
-        fmt.Fprintf(os.Stderr, "[line %d] Error: %v %s\n", token.Line, token.Literal, token.Lexeme)
+func CreateToken(tokenType TokenType, lexeme string, literal interface{}, line int) *Token {
+    return &Token{ Type: tokenType, Lexeme: lexeme, Literal: literal, Line: line }
+} 
+
+
+func (token *Token) PrintToken() {
+    if token.Type == UnterminatedStringError {
+        fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n", token.Line)
         return 
+    } else if token.Type == UnexpectedCharacterError {
+        fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", token.Line, token.Lexeme)
+        return
+    } else if token.Type == NumericError {
+        fmt.Fprintf(os.Stderr, "[line %d] Error: ...\n", token.Line)
+        return
     }
 
-    msg_parts := []string{ "%s","%s","%s","\n" }
+    msg_parts := []string{ "%s","%s","%s\n" }
     if token.Type == Number {
         num_decimals := GetDecimalPlaces(token.Lexeme)
-        msg_parts[2] = fmt.Sprintf("%s%df", "%.", num_decimals)
+        msg_parts[2] = fmt.Sprintf("%s%df\n", "%.", num_decimals)
     } else if token.Type == String {
         msg_parts[1] = "\"%s\""
     }    
 
-    fmt.Printf(strings.Join(msg_parts, " "), tokenTypeName[token.Type], token.Lexeme, token.Literal)
+    fmt.Fprintf(os.Stdout, strings.Join(msg_parts, " "), tokenTypeName[token.Type], token.Lexeme, token.Literal)
 }

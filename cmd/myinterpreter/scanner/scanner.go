@@ -6,75 +6,77 @@ import (
 )
 
 
-func Scan(fileContents []byte) {
+func Scan(fileContents []byte) ([]*token.Token, bool) {
+    tokens := make([]*token.Token, 0)
     line_num := 1
     is_lexical_error := false
+    var t *token.Token
     for i:=0; i < len(fileContents); i++ {
         if (fileContents[i] == '(') {
-            t := token.Token[string]{ Type: token.LeftParen, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.LeftParen, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == ')') {
-            t := token.Token[string]{ Type: token.RightParen, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.RightParen, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '{') {
-            t := token.Token[string]{ Type: token.LeftBrace, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.LeftBrace, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '}') {
-            t := token.Token[string]{ Type: token.RightBrace, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.RightBrace, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == ',') {
-            t := token.Token[string]{ Type: token.Comma, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Comma, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '.') {
-            t := token.Token[string]{ Type: token.Period, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Period, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '*') {
-            t := token.Token[string]{ Type: token.Asterisk, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Asterisk, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '+') {
-            t := token.Token[string]{ Type: token.Plus, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Plus, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '-') {
-            t := token.Token[string]{ Type: token.Minus, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Minus, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == ';') {
-            t := token.Token[string]{ Type: token.Semicolon, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Semicolon, string(fileContents[i]), "null", line_num)
+            tokens = append(tokens, t)
         } else if fileContents[i] == '!' {
             if len(fileContents) > i+1 && fileContents[i+1] == '='{
-                t := token.Token[string]{ Type: token.BangEqual, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.BangEqual, string(fileContents[i:i+2]), "null", line_num)
+                tokens = append(tokens, t)
                 i++
             } else {
-                t := token.Token[string]{ Type: token.Bang, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Bang, string(fileContents[i]), "null", line_num)
+                tokens = append(tokens, t)
             }
         } else if fileContents[i] == '=' {
             if len(fileContents) > i+1 && fileContents[i+1] == '='{
-                t := token.Token[string]{ Type: token.EqualEqual, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.EqualEqual, string(fileContents[i:i+2]), "null", line_num)
+                tokens = append(tokens, t)
                 i++
             } else {
-                t := token.Token[string]{ Type: token.Equal, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Equal, string(fileContents[i]), "null", line_num)
+                tokens = append(tokens, t)
             }
         } else if fileContents[i] == '<' {
             if len(fileContents) > i+1 && fileContents[i+1] == '='{
-                t := token.Token[string]{ Type: token.LessEqual, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.LessEqual, string(fileContents[i:i+2]), "null", line_num)
+                tokens = append(tokens, t)
                 i++
             } else {
-                t := token.Token[string]{ Type: token.Less, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Less, string(fileContents[i]), "null", line_num)
+                tokens = append(tokens, t)
             }
         } else if fileContents[i] == '>' {
             if len(fileContents) > i+1 && fileContents[i+1] == '='{
-                t := token.Token[string]{ Type: token.GreaterEqual, Lexeme: string(fileContents[i:i+2]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.GreaterEqual, string(fileContents[i:i+2]), "null", line_num)
+                tokens = append(tokens, t)
                 i++
             } else {
-                t := token.Token[string]{ Type: token.Greater, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Greater, string(fileContents[i]), "null", line_num)
+                tokens = append(tokens, t)
             }
         } else if fileContents[i] == '/' {
             if len(fileContents) > i+1 && fileContents[i+1] == '/' {
@@ -82,8 +84,8 @@ func Scan(fileContents []byte) {
                 for ; i < len(fileContents) && fileContents[i] != '\n'; i++ {} // do nothing
                 line_num++
             } else {
-                t := token.Token[string]{ Type: token.Slash, Lexeme: string(fileContents[i]), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Slash, string(fileContents[i]), "null", line_num)
+                tokens = append(tokens, t)
             }
         } else if fileContents[i] == '"' {
             i++
@@ -92,57 +94,47 @@ func Scan(fileContents []byte) {
                 contents = append(contents, fileContents[i])
             }
             if i < len(fileContents) && fileContents[i] == '"' {
-                t := token.Token[string]{ Type: token.String, Lexeme: string(contents), Literal: string(contents), Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.String, string(contents), string(contents), line_num)
+                tokens = append(tokens, t)
             } else {
                 is_lexical_error = true
-                t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "Unterminated String", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.UnterminatedStringError, string(contents), "", line_num)
+                tokens = append(tokens, t)
             }
         } else if IsNumeric(fileContents[i]) {
             contents := []byte{}
             has_decimal := false
-            num_decimal_digits := 0
-            has_non_zero_decimal := false
             for ; i < len(fileContents) && (IsNumeric(fileContents[i]) || fileContents[i] == '.'); i++ {
                 if fileContents[i] == '.' {
+                    // has mulitple decimals in number
                     if has_decimal {
-                        t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "...", Line: line_num }
-            t.PrintToken()
+                        t = token.CreateToken(token.NumericError, string(contents), "", line_num)
+                        tokens = append(tokens, t)
+                        break
+                    // Number starts with decimal
+                    } else if len(contents) == 0 { 
+                        t = token.CreateToken(token.NumericError, string(contents), "", line_num)
+                        tokens = append(tokens, t)
+                        break
                     }
                     
                     has_decimal = true
-                    if len(fileContents) > 0 {
-                        if len(fileContents) > i+1 && IsNumeric(fileContents[i]) {
-                            contents = append(contents, fileContents[i])
-                            i++
-                            contents = append(contents, fileContents[i])
-                            if fileContents[i] != '0'{
-                                has_non_zero_decimal = true
-                            }
-                            num_decimal_digits++
-                        } else {
-                            t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "...", Line: line_num }
-            t.PrintToken()
-                        }
+                    if len(fileContents) > i+1 && IsNumeric(fileContents[i+1]) {
+                        contents = append(contents, fileContents[i])
+                        i++
+                        contents = append(contents, fileContents[i])
                     } else {
-                        t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "...", Line: line_num }
-            t.PrintToken()
+                        t = token.CreateToken(token.NumericError, string(contents), "", line_num)
+                        tokens = append(tokens, t)
                     }
                 } else {
                     contents = append(contents, fileContents[i])
-                    if has_decimal { 
-                        if fileContents[i] != '0'{
-                            has_non_zero_decimal = true
-                        }
-                        num_decimal_digits++
-                    }
                 }
             }
 
             f, _ := strconv.ParseFloat(string(contents), 64)
-            t := token.Token[float64]{ Type: token.Number, Lexeme: string(contents), Literal: f, Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.Number, string(contents), f, line_num)
+            tokens = append(tokens, t)
             i-- //decrement counter to avoid skipping due to increment in parent for loop
         } else if IsAlpha(fileContents[i]) || IsNumeric(fileContents[i]) {
             word := []byte{}
@@ -153,58 +145,57 @@ func Scan(fileContents []byte) {
             i--
 
             if string(word) == "and" {
-                t := token.Token[string]{ Type: token.And, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.And, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "class" {
-                t := token.Token[string]{ Type: token.Class, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Class, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "else" {
-                t := token.Token[string]{ Type: token.Else, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Else, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "false" {
-                t := token.Token[string]{ Type: token.False, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.False, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "for" {
-                t := token.Token[string]{ Type: token.For, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.For, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "fun" {
-                t := token.Token[string]{ Type: token.Fun, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Fun, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "if" {
-                t := token.Token[string]{ Type: token.If, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.If, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "nil" {
-                t := token.Token[string]{ Type: token.Nil, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Nil, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "or" {
-                t := token.Token[string]{ Type: token.Or, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Or, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "print" {
-                t := token.Token[string]{ Type: token.Print, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Print, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "return" {
-                t := token.Token[string]{ Type: token.Return, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Return, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "super" {
-                t := token.Token[string]{ Type: token.Super, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Super, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "this" {
-                t := token.Token[string]{ Type: token.This, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.This, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "true" {
-                t := token.Token[string]{ Type: token.True, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.True, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "var" {
-                t := token.Token[string]{ Type: token.Var, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Var, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else if string(word) == "while" {
-                t := token.Token[string]{ Type: token.While, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.While, string(word), "null", line_num)
+                tokens = append(tokens, t)
             } else {
-                t := token.Token[string]{ Type: token.Identifier, Lexeme: string(word), Literal: "null", Line: line_num }
-            t.PrintToken()
+                t = token.CreateToken(token.Identifier, string(word), "null", line_num)
+                tokens = append(tokens, t)
             }
-         
         } else if fileContents[i] == ' ' {
             // do nothing
         } else if fileContents[i] == '\t' {
@@ -213,32 +204,34 @@ func Scan(fileContents []byte) {
             line_num++
         } else if (fileContents[i] == '$') {
             is_lexical_error = true
-            t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "Unexpected character", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.UnexpectedCharacterError, string(fileContents[i]), "", line_num)
+            tokens = append(tokens, t)
         } else if (fileContents[i] == '#') {
             is_lexical_error = true
-            t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "Unexpected character", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.UnexpectedCharacterError, string(fileContents[i]), "", line_num)
+            tokens = append(tokens, t)
         } else {
             is_lexical_error = true
-            t := token.Token[string]{ Type: token.Error, Lexeme: string(fileContents[i]), Literal: "Unexpected character", Line: line_num }
-            t.PrintToken()
+            t = token.CreateToken(token.UnexpectedCharacterError, string(fileContents[i]), "", line_num)
+            tokens = append(tokens, t)
         }
     }
 
     // adding EOF token at end of file
-    t := token.Token[string]{ Type: token.EOF, Lexeme: string(""), Literal: "null", Line: line_num }
-    t.PrintToken()
+    t = token.CreateToken(token.EOF, string(""), "null", line_num)
+    tokens = append(tokens, t)
+
+    return tokens, is_lexical_error
 }
 
 func Peek() {}
 
 func Advanced() {}
 
-func IsNumeric(c byte) bool {
+func IsAlpha(c byte) bool {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_') 
 }
 
-func IsAlpha(c byte) bool {
-    return c >= '0' && c <= '9' 
+func IsNumeric(c byte) bool {
+    return c >= '0' && c <= '9'
 }
