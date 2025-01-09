@@ -91,7 +91,20 @@ func PrintExpression(expr Expr) {
         fmt.Println("default case")
     case Literal:
         t := e.Value.(*token.Token)
-        fmt.Fprintf(os.Stdout, "%v\n", t.Lexeme)
+        var val interface{}
+
+        msg_parts := []string{ "%v\n" }
+        if t.Type == token.Number {
+            num_decimals := GetDecimalPlaces(t.Lexeme)
+            val = t.Literal
+            msg_parts[0] = fmt.Sprintf("%s%df\n", "%.", num_decimals)
+        } else if t.Type == token.String {
+            val = t.Literal
+        } else {
+            val = t.Lexeme
+        }
+        
+        fmt.Fprintf(os.Stdout, strings.Join(msg_parts, ""), val)
     case Binary:
         l := e.Left.(*token.Token)
         r := e.Right.(*token.Token)
@@ -142,6 +155,8 @@ func Parse(tokens []*token.Token) {
             expressions = append(expressions, Binary{Left: tokens[i-1], Right: tokens[i+1], Operator: tokens[i]})
         } else if currType == token.Asterisk || currType == token.Slash {
             expressions = append(expressions, Binary{Left: tokens[i-1], Right: tokens[i+1], Operator: tokens[i]})
+        } else if currType == token.Number || currType == token.String {
+            expressions = append(expressions, Literal{ Value: tokens[i] })
         }
     }
 
