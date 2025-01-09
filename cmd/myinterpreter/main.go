@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
     "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
+    "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
 )
 
 func main() {
@@ -32,8 +33,14 @@ func main() {
     
     tokens, is_lexical_error := scanner.Scan(fileContents)
 
-    for _, token := range tokens {
-        token.PrintToken()
+    if command == "tokenize" {
+        for _, token := range tokens {
+            token.PrintToken()
+        }
+    }
+
+    if command == "parse" {
+        parser.Parse(tokens)
     }
     
     status_code := 0

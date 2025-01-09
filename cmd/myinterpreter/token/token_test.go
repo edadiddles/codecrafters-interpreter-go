@@ -30,16 +30,16 @@ func TestPrintTokenTrailingZerosFloat(t *testing.T) {
 }
 
 func TestPrintTokenString(t *testing.T) {
-    token := Token[string]{Type: String, Lexeme: "this is a string", Literal: "this is a string"}
+    token := Token{ String, Lexeme: "this is a string", Literal: "this is a string"}
     token.PrintToken()
 }
 
 func TestPrintTokenErrorUnterminatedString(t *testing.T) {
-    token := Token[string]{ Type: Error, Lexeme: string('c'), Literal: "Unterminated String", Line: 2 }
+    token := Token{ Type: Error, Lexeme: string('c'), Literal: "Unterminated String", Line: 2 }
     token.PrintToken()
 }
 
 func TestPrintTokenErrorUnexpectedToken(t *testing.T) {
-    token := Token[string]{ Type: Error, Lexeme: string('$'), Literal: "Unexpected character", Line: 3 }
+    token := Token{ Type: Error, Lexeme: string('$'), Literal: "Unexpected character", Line: 3 }
     token.PrintToken()
 }
