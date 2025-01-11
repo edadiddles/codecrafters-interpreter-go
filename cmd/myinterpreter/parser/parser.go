@@ -4,6 +4,7 @@ import (
     "os"
     "fmt"
     "strings"
+    "errors"
     "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/token"
 )
 
@@ -24,34 +25,55 @@ type Literal struct {
 }
 
 type Unary struct {
-    Operator token.Token
-    right Expr
+    Operator *token.Token
+    Right Expr
 }
 
-func peek() token.Token {
-    return token.Token{}
+type Parser struct {
+    Tokens []*token.Token
+    CurrentPosition int
 }
 
-func advance() token.Token {
-    return token.Token{}
+func (p *Parser) isAtEnd() bool {
+    return p.peek().Type == token.EOF
 }
 
-func check(tokenType token.TokenType) bool {
-    if tokenType == token.EOF {
-        return false
+func (p *Parser) peek() *token.Token {
+    return p.Tokens[p.CurrentPosition]
+}
+
+func (p *Parser) advance() *token.Token {
+    if !p.isAtEnd() {
+        p.CurrentPosition += 1
     }
 
-    return peek().Type == tokenType
+    return p.previous()
 }
 
-func previous() token.Token {
-    return token.Token{}
+func (p *Parser) check(tokenType token.TokenType) bool {
+   if p.isAtEnd() {
+        return false
+    } 
+
+    return p.peek().Type == tokenType
 }
 
-func Match(tokenTypes []token.TokenType) bool {
+func (p *Parser) previous() *token.Token {
+    return p.Tokens[p.CurrentPosition-1]
+}
+
+func (p *Parser) consume(tokenType token.TokenType, errorStr string) (*token.Token, error) {
+    if p.check(tokenType) {
+        return p.advance(), nil
+    }
+
+    return p.peek(), errors.New(errorStr)
+}
+
+func (p *Parser) Match(tokenTypes []token.TokenType) bool {
     for _, tokenType := range tokenTypes {
-        if check(tokenType) {
-            advance()
+        if p.check(tokenType) {
+            p.advance()
             return true
         }
     }
@@ -59,70 +81,124 @@ func Match(tokenTypes []token.TokenType) bool {
     return false
 }
 
-//func Expression() Expr {
-//    return Equality()
-//}
-
-//func Equality() Expr {
-//    expr := Comparison()
-
-//    for Match([]token.TokenType{token.BangEqual, token.EqualEqual}) {
-//        operator := previous()
-//        right := Comparison()
-//        expr = Binary{ Left: expr, Right: right, Operator: *operator }
-//    }
-
-//    return expr
-//}
-
-//func Comparison() Expr {
-//    return Binary{}
-//}
-
-func Addition() {
+func (p *Parser) ExpressionGrammer() Expr {
+    return p.EqualityGrammer()
 }
 
-func Multiplication() {
+func (p *Parser) EqualityGrammer() Expr {
+    expr := p.ComparisonGrammer()
+
+    for p.Match([]token.TokenType{token.BangEqual, token.EqualEqual}) {
+        operator := p.previous()
+        right := p.ComparisonGrammer()
+        expr = Binary{ Left: expr, Right: right, Operator: operator }
+    }
+
+    return expr
 }
 
-func PrintExpression(expr Expr) {
+func (p *Parser) ComparisonGrammer() Expr {
+    expr := p.TermGrammer()
+
+    for p.Match([]token.TokenType{token.Greater, token.GreaterEqual, token.Less, token.LessEqual}) {
+        operator := p.previous()
+        right := p.TermGrammer()
+        expr = Binary{ Left: expr, Right: right, Operator: operator }
+    }
+
+    return expr
+}
+
+func (p *Parser) TermGrammer() Expr {
+    expr := p.FactorGrammer()
+
+    for p.Match([]token.TokenType{token.Plus, token.Minus}) {
+        operator := p.previous()
+        right := p.FactorGrammer()
+        expr = Binary{ Left: expr, Right: right, Operator: operator }
+    }
+
+    return expr
+}
+
+func (p *Parser) FactorGrammer() Expr {
+    expr := p.UnaryGrammer()
+
+    for p.Match([]token.TokenType{token.Asterisk, token.Slash}) {
+        operator := p.previous()
+        right := p.UnaryGrammer()
+        expr = Binary{ Left: expr, Right: right, Operator: operator }
+    }
+
+    return expr
+}
+
+func (p *Parser) UnaryGrammer() Expr {
+    if p.Match([]token.TokenType{token.Bang, token.Minus}) {
+        operator := p.previous()
+        right := p.UnaryGrammer()
+        return Unary{ Operator: operator, Right: right }
+    }
+
+    return p.PrimaryGrammer()
+}
+
+func (p *Parser) PrimaryGrammer() Expr {
+    if p.Match([]token.TokenType{token.False,token.True,token.Nil}) {
+        return Literal{ Value: p.previous() }
+    } else if p.Match([]token.TokenType{token.Number, token.String}) {
+        return Literal{ Value: p.previous() }
+    } else if p.Match([]token.TokenType{token.LeftParen}) {
+        expr := p.ExpressionGrammer()
+        p.consume(token.RightParen, "Expect ')' after expression.")
+        return Grouping{ Expression: expr }
+    }
+    
+    return nil
+}
+
+func formatExpression(operator string, exprs ...Expr) string {
+    str := "(" + operator
+    for _, expr := range exprs {
+        str = str + " "
+        str = str + PrintExpression(expr)
+    }
+    str = str + ")"
+
+    return str
+}
+
+
+func PrintExpression(expr Expr) string {
     switch e := expr.(type) {
     default:    
-        fmt.Println("default case")
+        return fmt.Sprintf("Unknown type: %T", e)
     case Literal:
         t := e.Value.(*token.Token)
         var val interface{}
 
-        msg_parts := []string{ "%v\n" }
+        msg_parts := []string{ "%v" }
         if t.Type == token.Number {
             num_decimals := GetDecimalPlaces(t.Lexeme)
             val = t.Literal
-            msg_parts[0] = fmt.Sprintf("%s%df\n", "%.", num_decimals)
+            msg_parts[0] = fmt.Sprintf("%s%df", "%.", num_decimals)
         } else if t.Type == token.String {
             val = t.Literal
         } else {
             val = t.Lexeme
         }
         
-        fmt.Fprintf(os.Stdout, strings.Join(msg_parts, ""), val)
+        return fmt.Sprintf(strings.Join(msg_parts, ""), val)
+    case Unary:
+        r := e.Right
+        return formatExpression(e.Operator.Lexeme, r)
     case Binary:
-        l := e.Left.(*token.Token)
-        r := e.Right.(*token.Token)
-
-        msg_parts := []string{ "(%s","%s","%s)\n" }
-        if l.Type == token.Number {
-            num_decimals := GetDecimalPlaces(l.Lexeme)
-            msg_parts[1] = fmt.Sprintf("%s%df", "%.", num_decimals)
-        } else if l.Type == token.String {
-            msg_parts[1] = "\"%s\""
-        }    
-        if r.Type == token.Number {
-            num_decimals := GetDecimalPlaces(r.Lexeme)
-            msg_parts[2] = fmt.Sprintf("%s%df)\n", "%.", num_decimals)
-        } else if l.Type == token.String {
-            msg_parts[2] = "\"%s\")\n"
-        }
-        fmt.Fprintf(os.Stdout, strings.Join(msg_parts, ", "), e.Operator.Lexeme, l.Literal, r.Literal)
+        l := e.Left
+        r := e.Right
+        return formatExpression(e.Operator.Lexeme, l, r)
+    case Grouping:
+        t := e.Expression
+        return formatExpression("group", t)
     }
 }
 
@@ -147,21 +223,18 @@ func GetDecimalPlaces(floatStr string) int {
 
 func Parse(tokens []*token.Token) {
     expressions := make([]Expr, 0) 
-    for i:=0; i < len(tokens); i++ {
-        currType := tokens[i].Type
-        if currType == token.True || currType == token.False || currType == token.Nil {
-            expressions = append(expressions, Literal{ Value: tokens[i] })
-        } else if currType == token.Plus || currType == token.Minus {
-            expressions = append(expressions, Binary{Left: tokens[i-1], Right: tokens[i+1], Operator: tokens[i]})
-        } else if currType == token.Asterisk || currType == token.Slash {
-            expressions = append(expressions, Binary{Left: tokens[i-1], Right: tokens[i+1], Operator: tokens[i]})
-        } else if currType == token.Number || currType == token.String {
-            expressions = append(expressions, Literal{ Value: tokens[i] })
-        }
+   
+    parser := Parser{ Tokens: tokens, CurrentPosition: 0 }
+    
+    for ; !parser.isAtEnd(); {
+        expr := parser.ExpressionGrammer()
+        expressions = append(expressions, expr)
     }
+    
 
     for _, expr := range expressions {
-        PrintExpression(expr)
+        str := PrintExpression(expr)
+        fmt.Fprintf(os.Stdout, "%s\n", str)
     }
 }
 
