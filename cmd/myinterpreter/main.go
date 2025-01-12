@@ -30,23 +30,31 @@ func main() {
         fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
         os.Exit(1)
     }
-    
-    tokens, is_lexical_error := scanner.Scan(fileContents)
 
+
+    tokens, is_lexical_error := scanner.Scan(fileContents)
     if command == "tokenize" {
         for _, token := range tokens {
             token.PrintToken()
         }
+        
+        if is_lexical_error {
+            os.Exit(65)
+        } 
     }
 
+    exprs, is_parse_error := parser.Parse(tokens)
     if command == "parse" {
-        parser.Parse(tokens)
+        for _, expr := range exprs {
+            str := parser.PrintExpression(expr)
+            fmt.Fprintf(os.Stdout, "%s\n", str)
+        }
+
+        if is_parse_error {
+            os.Exit(65)
+        }
     }
     
-    status_code := 0
-    if is_lexical_error {
-        status_code = 65
-    }
 
-    os.Exit(status_code)
+    os.Exit(0)
 }

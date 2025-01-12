@@ -70,6 +70,37 @@ func (p *Parser) consume(tokenType token.TokenType, errorStr string) (*token.Tok
     return p.peek(), errors.New(errorStr)
 }
 
+func (p *Parser) synchronize() {
+    p.advance()
+
+    for ; !p.isAtEnd(); {
+        if p.previous().Type == token.Semicolon {
+            return
+        }
+
+        t := p.peek().Type
+        if t == token.Class {
+            return
+        } else if t == token.Fun {
+            return
+        } else if t == token.Var {
+            return
+        } else if t == token.For {
+            return
+        } else if t == token.If {
+            return
+        } else if t == token.While {
+            return
+        } else if t == token.Print {
+            return
+        } else if t == token.Return {
+            return
+        }
+
+        p.advance()
+    }
+}
+
 func (p *Parser) Match(tokenTypes []token.TokenType) bool {
     for _, tokenType := range tokenTypes {
         if p.check(tokenType) {
@@ -81,80 +112,123 @@ func (p *Parser) Match(tokenTypes []token.TokenType) bool {
     return false
 }
 
-func (p *Parser) ExpressionGrammer() Expr {
+func (p *Parser) ExpressionGrammer() (Expr, error) {
     return p.EqualityGrammer()
 }
 
-func (p *Parser) EqualityGrammer() Expr {
-    expr := p.ComparisonGrammer()
+func (p *Parser) EqualityGrammer() (Expr, error) {
+    expr, err := p.ComparisonGrammer()
+    if err != nil {
+        return nil, err
+    }
 
     for p.Match([]token.TokenType{token.BangEqual, token.EqualEqual}) {
         operator := p.previous()
-        right := p.ComparisonGrammer()
+        right, err := p.ComparisonGrammer()
+        if err != nil {
+            return nil, err
+        }
+
         expr = Binary{ Left: expr, Right: right, Operator: operator }
     }
 
-    return expr
+    return expr, nil
 }
 
-func (p *Parser) ComparisonGrammer() Expr {
-    expr := p.TermGrammer()
+func (p *Parser) ComparisonGrammer() (Expr, error) {
+    expr, err := p.TermGrammer()
+    if err != nil {
+        return nil, err
+    }
 
     for p.Match([]token.TokenType{token.Greater, token.GreaterEqual, token.Less, token.LessEqual}) {
         operator := p.previous()
-        right := p.TermGrammer()
+        right, err := p.TermGrammer()
+        if err != nil {
+            return nil, err
+        }
         expr = Binary{ Left: expr, Right: right, Operator: operator }
     }
 
-    return expr
+    return expr, nil
 }
 
-func (p *Parser) TermGrammer() Expr {
-    expr := p.FactorGrammer()
+func (p *Parser) TermGrammer() (Expr, error) {
+    expr, err := p.FactorGrammer()
+    if err != nil {
+        return nil, err
+    }
 
     for p.Match([]token.TokenType{token.Plus, token.Minus}) {
         operator := p.previous()
-        right := p.FactorGrammer()
+        right, err := p.FactorGrammer()
+        if err != nil {
+            return nil, err
+        }
         expr = Binary{ Left: expr, Right: right, Operator: operator }
     }
 
-    return expr
+    return expr, nil
 }
 
-func (p *Parser) FactorGrammer() Expr {
-    expr := p.UnaryGrammer()
+func (p *Parser) FactorGrammer() (Expr, error) {
+    expr, err := p.UnaryGrammer()
+    if err != nil {
+        return nil, err
+    }
 
     for p.Match([]token.TokenType{token.Asterisk, token.Slash}) {
         operator := p.previous()
-        right := p.UnaryGrammer()
+        right, err := p.UnaryGrammer()
+        if err != nil {
+            return nil, err
+        }
         expr = Binary{ Left: expr, Right: right, Operator: operator }
     }
 
-    return expr
+    return expr, nil
 }
 
-func (p *Parser) UnaryGrammer() Expr {
+func (p *Parser) UnaryGrammer() (Expr, error) {
     if p.Match([]token.TokenType{token.Bang, token.Minus}) {
         operator := p.previous()
-        right := p.UnaryGrammer()
-        return Unary{ Operator: operator, Right: right }
+        right, err := p.UnaryGrammer()
+        if err != nil {
+            return nil, err
+        }
+        return Unary{ Operator: operator, Right: right }, nil
     }
 
     return p.PrimaryGrammer()
 }
 
-func (p *Parser) PrimaryGrammer() Expr {
+func (p *Parser) PrimaryGrammer() (Expr, error) {
     if p.Match([]token.TokenType{token.False,token.True,token.Nil}) {
-        return Literal{ Value: p.previous() }
+        return Literal{ Value: p.previous() }, nil
     } else if p.Match([]token.TokenType{token.Number, token.String}) {
-        return Literal{ Value: p.previous() }
+        return Literal{ Value: p.previous() }, nil
     } else if p.Match([]token.TokenType{token.LeftParen}) {
-        expr := p.ExpressionGrammer()
-        p.consume(token.RightParen, "Expect ')' after expression.")
-        return Grouping{ Expression: expr }
+        expr, err := p.ExpressionGrammer()
+        if err != nil {
+            return nil, err
+        }
+        t, err := p.consume(token.RightParen, "Expect ')' after expression.")
+        if err != nil {
+            if t.Type == token.EOF {
+                fmt.Fprintf(os.Stderr, "[line %d] Error: At EOF\n", t.Line)
+            } else {
+                fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", t.Line, err)
+            }
+            return nil, err
+        }
+        return Grouping{ Expression: expr }, nil
+    } else if p.Match([]token.TokenType{token.UnterminatedStringError, token.NumericError, token.UnexpectedCharacterError}) {
+        fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", p.previous().Line, "Lexical Error")
+        return nil, errors.New("Lexical Error")
     }
-    
-    return nil
+
+    p.advance()
+    return nil, errors.New("Unknown Grammer")
 }
 
 func formatExpression(operator string, exprs ...Expr) string {
@@ -221,20 +295,20 @@ func GetDecimalPlaces(floatStr string) int {
     return num_decimals
 }
 
-func Parse(tokens []*token.Token) {
+func Parse(tokens []*token.Token) ([]Expr, bool) {
     expressions := make([]Expr, 0) 
-   
-    parser := Parser{ Tokens: tokens, CurrentPosition: 0 }
-    
+  
+    hasError := false
+    parser := Parser{ Tokens: tokens, CurrentPosition: 0 } 
     for ; !parser.isAtEnd(); {
-        expr := parser.ExpressionGrammer()
+        expr, err := parser.ExpressionGrammer()
+        if err != nil {
+            hasError = true
+            continue
+        }
         expressions = append(expressions, expr)
     }
-    
 
-    for _, expr := range expressions {
-        str := PrintExpression(expr)
-        fmt.Fprintf(os.Stdout, "%s\n", str)
-    }
+    return expressions, hasError
 }
 
