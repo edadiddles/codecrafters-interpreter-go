@@ -56,16 +56,34 @@ func EvaluateBinaryExpression(expr parser.Binary) (Eval, error) {
     }
 
     if expr.Operator.Type == token.Minus {
-        l := left.(float64)
-        r := right.(float64)
+        l, ok := left.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
+        r, ok := right.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
         return l-r, nil
     } else if expr.Operator.Type == token.Slash {
-        l := left.(float64)
-        r := right.(float64)
+        l, ok := left.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
+        r, ok := right.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
         return l/r, nil
     } else if expr.Operator.Type == token.Asterisk {
-        l := left.(float64)
-        r := right.(float64)
+        l, ok := left.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
+        r, ok := right.(float64)
+        if !ok {
+            return nil, errors.New("Unexpected type, expected float64")
+        }
         return l*r, nil
     } else if expr.Operator.Type == token.Plus {
         lf_val, lf_ok := left.(float64)
