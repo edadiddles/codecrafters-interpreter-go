@@ -5,6 +5,7 @@ import (
 	"os"
     "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/scanner"
     "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/parser"
+    "github.com/codecrafters-io/interpreter-starter-go/cmd/myinterpreter/evaluator"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 
 	command := os.Args[1]
 
-	if command != "tokenize" && command != "parse" {
+	if command != "tokenize" && command != "parse" && command != "evaluate" {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
 	}
@@ -54,7 +55,18 @@ func main() {
             os.Exit(65)
         }
     }
-    
+
+    evals, is_runtime_error := evaluator.Evaluate(exprs)
+    if command == "evaluate" {
+        for _, eval := range evals {
+            str := evaluator.PrintEval(eval)
+            fmt.Fprintf(os.Stdout, "%s\n", str)
+        }
+
+        if is_runtime_error {
+            os.Exit(70)
+        }
+    }
 
     os.Exit(0)
 }
