@@ -9,8 +9,8 @@ import (
 
 type Eval interface{}
 
-func isTruthy(eval Eval) bool {
-    if eval == nil {
+func isTruthy(eval Eval) bool { 
+    if eval == "nil" {
         return false
     }
 
@@ -42,7 +42,7 @@ func EvaluateExpression(expr parser.Expr) (Eval, error) {
     }
 
     // Unreachable
-    return nil, nil
+    return nil, errors.New("unreachable")
 }
 
 func EvaluateBinaryExpression(expr parser.Binary) (Eval, error) {
@@ -137,8 +137,12 @@ func EvaluateGroupingExpression(expr parser.Grouping) (Eval, error) {
 
 func EvaluateLiteralExpression(expr parser.Literal) (Eval, error) {
     t := expr.Value.(*token.Token)
-    if t.Type == token.Number || t.Type == token.String {
+    if t.Type == token.Number || t.Type == token.String { 
         return t.Literal, nil
+    } else if t.Type == token.True {
+        return true, nil
+    } else if t.Type == token.False {
+        return false, nil
     }
 
     return t.Lexeme, nil
@@ -149,7 +153,6 @@ func EvaluateUnaryExpression(expr parser.Unary) (Eval, error) {
     if err != nil {
         return nil, err
     }
-
     if expr.Operator.Type == token.Minus {
         r, ok := right.(float64)
         if !ok {
